@@ -5,7 +5,62 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vendas | RuaRoma Sunset</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
+        :root{
+            --brand-red:#E63A2E;
+            --brand-green:#197a3b;
+            --bg-left:#071e26;
+            --bg-right:#0f3a45;
+            --card-bg: rgba(0,0,0,0.6);
+            --muted:#cfdde6;
+            --text:#ffffff;
+        }
+
+        html,body{height:100%;margin:0;}
+        body{
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:32px;
+            background-image: linear-gradient(90deg,var(--bg-left),var(--bg-right));
+            font-family: "Inter", Arial, Helvetica, sans-serif;
+            -webkit-font-smoothing:antialiased;
+        }
+
+        .box{
+            width:360px;
+            max-width:calc(100% - 48px);
+            background:var(--card-bg);
+            border-radius:15px;
+            padding:18px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+            color:var(--text);
+        }
+
+        .brand{
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:10px;
+            margin-bottom:12px;
+        }
+        .brand img{
+            max-width:220px;
+            height:auto;
+            display:block;
+        }
+        #brand-text{
+            display:none;
+            font-family:"Pacifico",cursive;
+            color:var(--brand-red);
+            font-size:20px;
+        }
+
+        /* ajuste pequena do label/valor */
+        .labelInput.staticLabel{ display:block; margin-bottom:6px; color:var(--muted); }
+        .valor-input{ text-align:right; font-size:18px; padding:8px 10px; width:100%; box-sizing:border-box; }
+
         body{
             font-family: Arial, Helvetica, sans-serif;
             background-image: linear-gradient(to right, rgb(20, 147, 220), rgb(17, 54, 71));
@@ -185,6 +240,13 @@
 </head>
 <body>
     <div class="box">
+        <!-- logo / brand (coloque assets/logo.png) -->
+        <div class="brand">
+            <img src="assets/logo.png" alt="RuaRoma Logo"
+                 onerror="this.style.display='none'; document.getElementById('brand-text').style.display='inline-block'">
+            <span id="brand-text">Vendas RuaRoma Sunset</span>
+        </div>
+
         <!-- Tela de Categorias -->
         <div id="tela-categorias">
             <h2>Escolha uma Categoria</h2>
@@ -601,5 +663,92 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
     </script>
+<<<<<<< Updated upstream
+=======
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('formulario-pedido');
+    if (!form) return;
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const jsPDFLib = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+        if (!jsPDFLib) {
+            alert('Erro: jsPDF não carregado.');
+            return;
+        }
+
+        const senha = document.getElementById('senha_pedido')?.value || Date.now().toString();
+
+        // coleta itens com quantidade > 0 (cada unidade vira uma página)
+        const itensSelecionados = Array.from(document.querySelectorAll('input[name="item_pedido"]'))
+            .map(cb => {
+                const key = cb.value;
+                const qtd = parseInt(document.getElementById('qtd_' + key)?.value || '0', 10) || 0;
+                const label = document.querySelector('label[for="'+cb.id+'"]');
+                const nomeItem = label ? label.textContent.split('-')[0].trim() : key;
+                return { key, nomeItem, qtd };
+            })
+            .filter(it => it.qtd > 0);
+
+        if (itensSelecionados.length === 0) {
+            alert('Nenhum item com quantidade selecionada.');
+            return;
+        }
+
+        try {
+            const doc = new jsPDFLib();
+            const pageWidth = doc.internal.pageSize.getWidth();
+            let pageIndex = 0;
+
+            itensSelecionados.forEach(it => {
+                for (let u = 1; u <= it.qtd; u++) {
+                    if (pageIndex > 0) doc.addPage();
+                    pageIndex++;
+
+                    // Cabeçalho centralizado
+                    doc.setFontSize(14);
+                    const marca = 'RuaRoma Sunset';
+                    const marcaW = doc.getTextWidth(marca);
+                    doc.text(marca, (pageWidth - marcaW) / 2, 28);
+
+                    // "VALE" em destaque centralizado
+                    doc.setFontSize(56);
+                    try { doc.setFont(undefined, 'bold'); } catch(_) {}
+                    const valeText = 'VALE';
+                    const valeW = doc.getTextWidth(valeText);
+                    doc.text(valeText, (pageWidth - valeW) / 2, 88);
+
+                    // Texto do vale - por unidade (ex: "Vale 1x Calabresa")
+                    // Aumentado para ter mais destaque (tamanho grande e em negrito)
+                    const textoVale = `Vale 1x ${it.nomeItem}`;
+                    doc.setFontSize( FortyOrMore = 40 ); // placeholder to keep line visible in editor
+                    // Ajuste correto abaixo:
+                    doc.setFontSize(40);
+                    try { doc.setFont(undefined, 'bold'); } catch(_) {}
+                    const textoW = doc.getTextWidth(textoVale);
+                    doc.text(textoVale, (pageWidth - textoW) / 2, 122);
+
+                    // Informação extra: índice da unidade, senha e data
+                    doc.setFontSize(10);
+                    try { doc.setFont(undefined, 'normal'); } catch(_) {}
+                    doc.text(`Unidade: ${u} de ${it.qtd}`, 20, 150);
+                    doc.text(`Senha: ${senha}`, 20, 160);
+                    doc.text(`Emitido: ${new Date().toLocaleString('pt-BR')}`, 20, 170);
+                }
+            });
+
+            const filename = `vales-${senha}.pdf`;
+            doc.save(filename);
+            alert(`PDF gerado com ${pageIndex} página(s): ${filename}`);
+        } catch (err) {
+            console.error('Erro ao gerar PDF:', err);
+            alert('Erro ao gerar PDF. Veja o console para detalhes.');
+        }
+    });
+});
+    </script>
+>>>>>>> Stashed changes
 </body>
 </html>
