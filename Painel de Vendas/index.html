@@ -245,7 +245,6 @@
 
                 const senha = document.getElementById('senha_pedido')?.value || Date.now().toString();
 
-                // coleta itens com quantidade > 0 (cada unidade vira uma página)
                 const itensSelecionados = Array.from(document.querySelectorAll('input[name="item_pedido"]'))
                     .map(cb => {
                         const key = cb.value;
@@ -284,19 +283,20 @@
                             const valeW = doc.getTextWidth(valeText);
                             doc.text(valeText, (pageWidth - valeW) / 2, 88);
 
-                            // Texto do vale - produto em destaque grande e em negrito
+                            // Texto do vale - produto com tamanho reduzido e alinhado à esquerda
                             const textoVale = `Vale 1x ${it.nomeItem}`;
-                            doc.setFontSize(40);
+                            doc.setFontSize(28);                 // tamanho reduzido para destacar sem ocupar tanto espaço
                             try { doc.setFont(undefined, 'bold'); } catch(e){}
-                            const textoW = doc.getTextWidth(textoVale);
-                            doc.text(textoVale, (pageWidth - textoW) / 2, 132);
+                            // posiciona à esquerda (mesma coluna do restante das informações)
+                            const leftX = 20;
+                            doc.text(textoVale, leftX, 132);
 
-                            // Informação extra: índice da unidade, senha e data
+                            // Informação extra: índice da unidade, senha e data (alinhados à esquerda)
                             doc.setFontSize(10);
                             try { doc.setFont(undefined, 'normal'); } catch(e){}
-                            doc.text(`Unidade: ${u} de ${it.qtd}`, 20, 160);
-                            doc.text(`Senha: ${senha}`, 20, 170);
-                            doc.text(`Emitido: ${new Date().toLocaleString('pt-BR')}`, 20, 180);
+                            doc.text(`Unidade: ${u} de ${it.qtd}`, leftX, 152);
+                            doc.text(`Senha: ${senha}`, leftX, 162);
+                            doc.text(`Emitido: ${new Date().toLocaleString('pt-BR')}`, leftX, 172);
                         }
                     });
 
