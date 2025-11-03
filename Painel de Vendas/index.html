@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulário | GN</title>
+    <title>Vendas | RuaRoma Sunset</title>
     <style>
         body{
             font-family: Arial, Helvetica, sans-serif;
@@ -44,6 +44,11 @@
             width: 100%;
             letter-spacing: 2px;
         }
+        .inputUser[name="senha_pedido"] {
+            text-align: center;
+            font-size: 24px;
+            letter-spacing: 2px;
+        }
         .labelInput{
             position: absolute;
             top: 0px;
@@ -77,59 +82,524 @@
         #submit:hover{
             background-image: linear-gradient(to right,rgb(0, 80, 172), rgb(80, 19, 195));
         }
+        .pedido-item {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .qtd-input {
+            width: 60px;
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid dodgerblue;
+            background: transparent;
+            color: white;
+        }
+        .botao-senha {
+            background-image: linear-gradient(to right,rgb(0, 92, 197), rgb(90, 20, 220));
+            border: none;
+            padding: 10px;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .botao-senha:hover {
+            background-image: linear-gradient(to right,rgb(0, 80, 172), rgb(80, 19, 195));
+        }
+
+        /* Estilos para a tela de categorias */
+        #tela-categorias {
+            text-align: center;
+        }
+
+        .categorias {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .categoria-btn {
+            background-color: rgba(30, 144, 255, 0.8);
+            border: none;
+            border-radius: 10px;
+            padding: 20px;
+            color: white;
+            cursor: pointer;
+            width: 150px;
+            height: 150px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+        }
+
+        .categoria-btn:hover {
+            background-color: rgba(30, 144, 255, 1);
+            transform: scale(1.05);
+        }
+
+        .categoria-btn img {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 10px;
+        }
+
+        .categoria-icone {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .categoria-btn span:last-child {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .voltar-btn {
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            color: white;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .voltar-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Esconder o formulário inicialmente */
+        #formulario-pedido {
+            display: none;
+        }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
     <div class="box">
-        <form action="">
+        <!-- Tela de Categorias -->
+        <div id="tela-categorias">
+            <h2>Escolha uma Categoria</h2>
+            <div class="categorias">
+                <button class="categoria-btn" onclick="mostrarCategoria('pizzas')">
+                    <span class="categoria-icone">🍕</span>
+                    <span>Pizzas</span>
+                </button>
+                <button class="categoria-btn" onclick="mostrarCategoria('bebidas')">
+                    <span class="categoria-icone">🍸</span>
+                    <span>Bebidas</span>
+                </button>
+            </div>
+            <button class="voltar-btn" style="display: none;" onclick="voltarCategorias()">Voltar para Categorias</button>
+        </div>
+
+        <!-- Formulário existente (será escondido inicialmente) -->
+        <form action="" id="formulario-pedido" style="display: none;">
             <fieldset>
-                <legend><b>Fórmulário de Clientes</b></legend>
+                <legend><b>Vendas RuaRoma Sunset</b></legend>
                 <br>
                 <div class="inputBox">
                     <input type="text" name="nome" id="nome" class="inputUser" required>
-                    <label for="nome" class="labelInput">Nome completo</label>
-                </div>
-                <br><br>
-                <div class="inputBox">
-                    <input type="text" name="email" id="email" class="inputUser" required>
-                    <label for="email" class="labelInput">Email</label>
+                    <label for="nome" class="labelInput">Nome</label>
                 </div>
                 <br><br>
                 <div class="inputBox">
                     <input type="tel" name="telefone" id="telefone" class="inputUser" required>
                     <label for="telefone" class="labelInput">Telefone</label>
                 </div>
-                <p>Sexo:</p>
-                <input type="radio" id="feminino" name="genero" value="feminino" required>
-                <label for="feminino">Feminino</label>
-                <br>
-                <input type="radio" id="masculino" name="genero" value="masculino" required>
-                <label for="masculino">Masculino</label>
-                <br>
-                <input type="radio" id="outro" name="genero" value="outro" required>
-                <label for="outro">Outro</label>
-                <br><br>
-                <label for="data_nascimento"><b>Data de Nascimento:</b></label>
-                <input type="date" name="data_nascimento" id="data_nascimento" required>
-                <br><br><br>
-                <div class="inputBox">
-                    <input type="text" name="cidade" id="cidade" class="inputUser" required>
-                    <label for="cidade" class="labelInput">Cidade</label>
+                <p>Pedidos (selecione os itens desejados):</p>
+                <!-- Para as pizzas -->
+                <div class="pedido-item item-pizza">
+                    <input type="checkbox" id="mussarela" name="item_pedido" value="mussarela">
+                    <label for="mussarela">Mussarela - R$25,00</label>
+                    <input type="number" id="qtd_mussarela" class="qtd-input" value="0" min="0" max="10">
+                </div>
+                <div class="pedido-item item-pizza">
+                    <input type="checkbox" id="calabresa" name="item_pedido" value="calabresa">
+                    <label for="calabresa">Calabresa - R$20,00</label>
+                    <input type="number" id="qtd_calabresa" class="qtd-input" value="0" min="0" max="10">
+                </div>
+                <div class="pedido-item item-pizza">
+                    <input type="checkbox" id="pepperoni" name="item_pedido" value="pepperoni">
+                    <label for="pepperoni">Pepperoni - R$30,00</label>
+                    <input type="number" id="qtd_pepperoni" class="qtd-input" value="0" min="0" max="10">
+                </div>
+                <div class="pedido-item item-pizza">
+                    <input type="checkbox" id="ragu_linguica" name="item_pedido" value="ragu_linguica">
+                    <label for="ragu_linguica">Ragú - R$35,00</label>
+                    <input type="number" id="qtd_ragu" class="qtd-input" value="0" min="0" max="10">
+                </div>
+                <div class="pedido-item item-pizza">
+                    <input type="checkbox" id="pannacotta" name="item_pedido" value="pannacotta">
+                    <label for="pannacotta">Pannacotta - R$15,00</label>
+                    <input type="number" id="qtd_pannacotta" class="qtd-input" value="0" min="0" max="10">
+                </div>
+                <!-- Para as bebidas -->
+                <div class="pedido-item item-bebida">
+                    <input type="checkbox" id="cuba" name="item_pedido" value="cuba">
+                    <label for="cuba">Cuba - R$20,00</label>
+                    <input type="number" id="qtd_cuba" class="qtd-input" value="0" min="0" max="10">
+                </div>
+                <div class="pedido-item item-bebida">
+                    <input type="checkbox" id="caipirinha" name="item_pedido" value="caipirinha">
+                    <label for="caipirinha">Caipirinha - R$20,00</label>
+                    <input type="number" id="qtd_caipirinha" class="qtd-input" value="0" min="0" max="10">
+                </div>
+                <div class="pedido-item item-bebida">
+                    <input type="checkbox" id="mojito" name="item_pedido" value="mojito">
+                    <label for="mojito">Mojito - R$25,00</label>
+                    <input type="number" id="qtd_mojito" class="qtd-input" value="0" min="0" max="10">
+                </div>
+                <div class="pedido-item item-bebida">
+                    <input type="checkbox" id="ginpesto" name="item_pedido" value="ginpesto">
+                    <label for="ginpesto">GinPesto - R$25,00</label>
+                    <input type="number" id="qtd_ginpesto" class="qtd-input" value="0" min="0" max="10">
+                </div>
+                <div class="pedido-item item-bebida">
+                    <input type="checkbox" id="refrigerante" name="item_pedido" value="refrigerante">
+                    <label for="refrigerante">Refrigerante - R$8,00</label>
+                    <input type="number" id="qtd_refrigerante" class="qtd-input" value="0" min="0" max="10">
+                </div>
+                <div class="pedido-item item-bebida">
+                    <input type="checkbox" id="agua" name="item_pedido" value="agua">
+                    <label for="agua">Água - R$5,00</label>
+                    <input type="number" id="qtd_agua" class="qtd-input" value="0" min="0" max="10">
                 </div>
                 <br><br>
                 <div class="inputBox">
-                    <input type="text" name="estado" id="estado" class="inputUser" required>
-                    <label for="estado" class="labelInput">Estado</label>
+                    <input type="number" name="valorTotalCompra" id="valorTotalCompra" class="inputUser" step="0.01" required>
+                    <label for="valorTotalCompra" class="labelInput">Valor Total da Compra</label>
                 </div>
                 <br><br>
                 <div class="inputBox">
-                    <input type="text" name="endereco" id="endereco" class="inputUser" required>
-                    <label for="endereco" class="labelInput">Endereço</label>
+                    <input type="text" name="senha_pedido" id="senha_pedido" class="inputUser" maxlength="2" required>
+                    <label for="senha_pedido" class="labelInput">Senha do Pedido</label>
                 </div>
-                <br><br>
+                <button type="button" id="gerarSenha" class="botao-senha">Gerar Nova Senha</button>
                 <input type="submit" name="submit" id="submit">
             </fieldset>
         </form>
     </div>
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+    // helper: gera PDF com apenas Nome, Telefone, itens (sem preço) e senha
+    function gerarPdfMinimal({ nome = '', telefone = '', itens = [], senha = '' }) {
+        const jsPDFLib = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+        if (!jsPDFLib) {
+            alert('Erro: jsPDF não carregado.');
+            return;
+        }
+        const doc = new jsPDFLib();
+        doc.setFontSize(16);
+        doc.text('RuaRoma Sunset - Comprovante de Pedido', 20, 20);
+        doc.setFontSize(12);
+        let y = 36;
+        if (nome) { doc.text(`Nome: ${nome}`, 20, y); y += 8; }
+        if (telefone) { doc.text(`Telefone: ${telefone}`, 20, y); y += 10; }
+        if (senha) { doc.text(`Senha: ${senha}`, 20, y); y += 12; }
+
+        doc.text('Itens:', 20, y); y += 8;
+        if (!itens || itens.length === 0) {
+            doc.text('(Nenhum item selecionado)', 20, y); y += 8;
+        } else {
+            itens.forEach(it => {
+                // mostrar apenas nome e quantidade (sem preço)
+                const nomeItem = it.nome || it.chave || '';
+                const qtd = Number(it.qtd || 0);
+                doc.text(`${nomeItem} - Qtd: ${qtd}`, 20, y);
+                y += 8;
+                if (y > 270) { doc.addPage(); y = 20; }
+            });
+        }
+
+        const filename = `pedido-${senha || Date.now()}.pdf`;
+        doc.save(filename);
+    }
+
+    // intercepta submit do formulário -> gera PDF minimal
+    const form = document.getElementById('formulario-pedido');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const getVal = id => document.getElementById(id)?.value ?? '';
+            const nome = getVal('nome');
+            const telefone = getVal('telefone');
+            const senha = getVal('senha_pedido');
+
+            const precos = window.precosItens || {};
+            const checked = Array.from(document.querySelectorAll('input[name="item_pedido"]:checked'));
+            const itens = checked.map(cb => {
+                const qtd = parseInt(document.getElementById(`qtd_${cb.value}`)?.value || '0', 10) || 0;
+                const label = document.querySelector(`label[for="${cb.id}"]`);
+                const nomeItem = label ? label.textContent.split('-')[0].trim() : cb.value;
+                return { chave: cb.value, nome: nomeItem, qtd };
+            });
+
+            gerarPdfMinimal({ nome, telefone, itens, senha });
+            alert('PDF gerado e baixado.');
+            // opcional: form.reset();
+        });
+    }
+
+    // atualiza botão do modal para usar o mesmo formato (se modal existir)
+    const btnSalvarImprimir = document.getElementById('btnSalvarImprimir');
+    if (btnSalvarImprimir) {
+        btnSalvarImprimir.addEventListener('click', () => {
+            // lê valores do modal (campo imp_itens: linhas "Nome | qtd | R$preco" ou similar)
+            const impNome = document.getElementById('imp_nome')?.value ?? '';
+            const impTel = document.getElementById('imp_telefone')?.value ?? '';
+            const impItensText = document.getElementById('imp_itens')?.value ?? '';
+            const impSenha = document.getElementById('imp_senha')?.value ?? '';
+
+            const linhas = impItensText.split('\n').map(l => l.trim()).filter(l => l !== '');
+            const itens = linhas.map(l => {
+                const parts = l.split('|').map(p => p.trim());
+                // parts[0] = nome, parts[1] = qtd (se existir)
+                return { nome: parts[0] || parts.join(' - '), qtd: parts[1] ? Number(parts[1]) || 0 : 0 };
+            });
+
+            gerarPdfMinimal({ nome: impNome, telefone: impTel, itens, senha: impSenha });
+            // fecha modal se houver função existente
+            const modal = document.getElementById('modal-impressao');
+            if (modal) modal.style.display = 'none';
+            alert('PDF gerado com dados editados para impressão.');
+        });
+    }
+});
+    </script>
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+    // garante que preços estejam disponíveis
+    window.precosItens = window.precosItens || {
+        mussarela:25.00, calabresa:20.00, pepperoni:30.00, ragu_linguica:35.00, pannacotta:15.00,
+        cuba:20.00, caipirinha:20.00, mojito:25.00, ginpesto:25.00, refrigerante:8.00, agua:5.00
+    };
+
+    const inputValorTotal = document.getElementById('valorTotalCompra');
+    if (!inputValorTotal) return;
+
+    function atualizarValorTotal() {
+        const checkboxes = document.querySelectorAll('input[name="item_pedido"]');
+        let total = 0;
+
+        checkboxes.forEach(cb => {
+            const key = cb.value;
+            const qtdEl = document.getElementById(`qtd_${key}`);
+            const qtd = qtdEl ? parseInt(qtdEl.value, 10) || 0 : 0;
+
+            // sincroniza checkbox <-> quantidade
+            if (qtd > 0) cb.checked = true;
+            if (!cb.checked) return;
+
+            const preco = Number(window.precosItens[key] || 0);
+            total += preco * qtd;
+        });
+
+        inputValorTotal.value = total.toFixed(2);
+
+        // Ajusta a label para "flutuar" quando houver valor
+        const label = document.querySelector(`label[for="${inputValorTotal.id}"]`);
+        if (label) {
+            if (total > 0) {
+                label.style.top = '-20px';
+                label.style.fontSize = '12px';
+                label.style.color = 'dodgerblue';
+            } else {
+                label.style.top = '0px';
+                label.style.fontSize = '';
+                label.style.color = '';
+            }
+        }
+    }
+
+    // ouvintes para checkboxes
+    document.querySelectorAll('input[name="item_pedido"]').forEach(cb => {
+        cb.addEventListener('change', () => {
+            const key = cb.value;
+            const qtdEl = document.getElementById(`qtd_${key}`);
+            if (cb.checked && qtdEl && (qtdEl.value === '' || Number(qtdEl.value) === 0)) qtdEl.value = 1;
+            if (!cb.checked && qtdEl) qtdEl.value = 0;
+            atualizarValorTotal();
+        });
+    });
+
+    // ouvintes para campos de quantidade
+    document.querySelectorAll('.qtd-input').forEach(q => {
+        q.addEventListener('input', () => {
+            const key = q.id.replace(/^qtd_/, '');
+            const cb = document.querySelector(`input[name="item_pedido"][value="${key}"]`);
+            const val = parseInt(q.value, 10) || 0;
+            if (cb) cb.checked = val > 0;
+            atualizarValorTotal();
+        });
+    });
+
+    // cálculo inicial
+    atualizarValorTotal();
+});
+    </script>
+    <script>
+        // Gerar senha aleatória para o pedido
+        function gerarSenha(length) {
+            const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            let senha = "";
+            for (let i = 0; i < length; i++) {
+                const randomIndex = Math.floor(Math.random() * charset.length);
+                senha += charset[randomIndex];
+            }
+            return senha;
+        }
+
+        function gerarSenhaAleatoria() {
+            const min = 1;
+            const max = 12;
+            const senha = Math.floor(Math.random() * (max - min + 1)) + min;
+            return senha.toString(); // Retorna apenas o número sem formatação
+        }
+
+        document.getElementById('gerarSenha').addEventListener('click', function() {
+            const novaSenha = gerarSenha(8);
+            document.getElementById('senha_pedido').value = novaSenha;
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputSenha = document.getElementById('senha_pedido');
+            const labelSenha = document.querySelector(`label[for="senha_pedido"]`);
+            
+            // Define valor inicial
+            inputSenha.value = gerarSenhaAleatoria();
+            
+            // Posiciona a label permanentemente acima
+            labelSenha.style.top = '-20px';
+            labelSenha.style.fontSize = '12px';
+            labelSenha.style.color = 'dodgerblue';
+        });
+
+        // Função para mostrar a categoria selecionada
+        function mostrarCategoria(categoria) {
+            const telaCategorias = document.getElementById('tela-categorias');
+            const formularioPedido = document.getElementById('formulario-pedido');
+            const voltarBtn = document.querySelector('.voltar-btn');
+            
+            // Esconde os botões de categoria e mostra o formulário
+            telaCategorias.querySelector('.categorias').style.display = 'none';
+            formularioPedido.style.display = 'block';
+            voltarBtn.style.display = 'block';
+
+            // Mostra/esconde itens baseado na categoria
+            const itensPizza = document.querySelectorAll('.item-pizza');
+            const itensBebida = document.querySelectorAll('.item-bebida');
+
+            if (categoria === 'pizzas') {
+                itensPizza.forEach(item => item.style.display = 'block');
+                itensBebida.forEach(item => item.style.display = 'none');
+            } else {
+                itensPizza.forEach(item => item.style.display = 'none');
+                itensBebida.forEach(item => item.style.display = 'block');
+            }
+        }
+
+        // Função para voltar à tela de categorias
+        function voltarCategorias() {
+            const telaCategorias = document.getElementById('tela-categorias');
+            const formularioPedido = document.getElementById('formulario-pedido');
+            const voltarBtn = document.querySelector('.voltar-btn');
+
+            telaCategorias.querySelector('.categorias').style.display = 'flex';
+            formularioPedido.style.display = 'none';
+            voltarBtn.style.display = 'none';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('formulario-pedido');
+    if (!form) {
+        console.error('Formulário não encontrado: id="formulario-pedido"');
+        return;
+    }
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        // checa jsPDF
+        const jsPDFLib = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+        if (!jsPDFLib) {
+            console.error('jsPDF não encontrado. Verifique inclusão do CDN no <head>.');
+            alert('Erro: jsPDF não carregado. Abra o console (F12) para detalhes.');
+            return;
+        }
+
+        try {
+            // obtém valores com checagem segura
+            const getVal = id => document.getElementById(id)?.value ?? '';
+            const nome = getVal('nome');
+            const telefone = getVal('telefone');
+            const endereco = getVal('endereco');
+            const cidade = getVal('cidade');
+            const senha = getVal('senha_pedido');
+            const valorTotal = getVal('valorTotalCompra') || '0.00';
+
+            // coleta itens selecionados de forma segura
+            const precos = window.precosItens || {};
+            const checked = Array.from(document.querySelectorAll('input[name="item_pedido"]:checked'));
+            const itens = checked.map(cb => {
+                const qtd = parseInt(document.getElementById(`qtd_${cb.value}`)?.value || '0', 10) || 0;
+                const preco = typeof precos[cb.value] === 'number' ? precos[cb.value] : 0;
+                const label = document.querySelector(`label[for="${cb.id}"]`);
+                const nomeItem = label ? label.textContent.split('-')[0].trim() : cb.value;
+                return { chave: cb.value, nome: nomeItem, qtd, preco, total: (qtd * preco) };
+            });
+
+            // gera PDF
+            const doc = new jsPDFLib();
+            doc.setFont('helvetica');
+            doc.setFontSize(16);
+            doc.text('RuaRoma Sunset - Comprovante de Pedido', 20, 20);
+            doc.setFontSize(12);
+
+            let y = 40;
+            if (nome) { doc.text(`Nome: ${nome}`, 20, y); y += 8; }
+            if (telefone) { doc.text(`Telefone: ${telefone}`, 20, y); y += 8; }
+            if (endereco) { doc.text(`Endereço: ${endereco}`, 20, y); y += 8; }
+            if (cidade) { doc.text(`Cidade: ${cidade}`, 20, y); y += 8; }
+            if (senha) { doc.text(`Senha do Pedido: ${senha}`, 20, y); y += 10; }
+
+            doc.text('Itens do Pedido:', 20, y); y += 8;
+            if (itens.length === 0) {
+                doc.text('(Nenhum item selecionado)', 20, y); y += 8;
+            } else {
+                itens.forEach(it => {
+                    doc.text(`${it.nome} - Qtd: ${it.qtd} - R$ ${it.total.toFixed(2)}`, 20, y);
+                    y += 8;
+                    if (y > 270) { doc.addPage(); y = 20; }
+                });
+            }
+
+            doc.setFontSize(14);
+            doc.text(`Valor Total: R$ ${valorTotal}`, 20, y + 12);
+            doc.setFontSize(10);
+            doc.text(`Emitido em: ${new Date().toLocaleString('pt-BR')}`, 20, y + 28);
+
+            const filename = `pedido-${senha || Date.now()}.pdf`;
+            doc.save(filename);
+
+            console.log('PDF gerado:', filename);
+            alert('Pedido realizado com sucesso! O comprovante foi baixado.');
+            // form.reset(); // opcional
+        } catch (err) {
+            console.error('Erro ao gerar PDF:', err);
+            alert('Erro ao gerar PDF. Veja o console (F12) para detalhes.');
+        }
+    });
+});
+    </script>
 </body>
 </html>
