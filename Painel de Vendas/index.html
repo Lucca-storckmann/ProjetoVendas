@@ -157,6 +157,16 @@
                     <label for="agua">Água - R$5,00</label>
                     <input type="number" id="qtd_agua" class="qtd-input" value="0" min="0" max="99">
                 </div>
+                <div class="pedido-item item-bebida">
+                    <input type="checkbox" id="chopp300" name="item_pedido" value="chopp300">
+                    <label for="chopp300">Chopp 300ml - R$12,00</label>
+                    <input type="number" id="qtd_chopp300" class="qtd-input" value="0" min="0" max="99">
+                </div>
+                <div class="pedido-item item-bebida">
+                    <input type="checkbox" id="chopp500" name="item_pedido" value="chopp500">
+                    <label for="chopp500">Chopp 500ml - R$18,00</label>
+                    <input type="number" id="qtd_chopp500" class="qtd-input" value="0" min="0" max="99">
+                </div>
 
                 <div class="inputBox" style="margin-top:10px;">
                     <label for="valorTotalCompra" class="labelInput staticLabel">Valor Total da Compra (R$)</label>
@@ -181,7 +191,8 @@
         // preços
         window.precosItens = {
             mussarela:25.00, calabresa:20.00, pepperoni:30.00, ragu_linguica:35.00, pannacotta:15.00,
-            cuba:20.00, caipirinha:20.00, mojito:25.00, ginpesto:25.00, refrigerante:8.00, agua:5.00
+            cuba:20.00, caipirinha:20.00, mojito:25.00, ginpesto:25.00, refrigerante:8.00, agua:5.00,
+            chopp300:12.00, chopp500:18.00
         };
 
         // mostrar categorias e filtrar itens
@@ -261,7 +272,15 @@
                 }
 
                 try {
-                    const doc = new jsPDFLib();
+                    // Configura PDF no formato cupom (80mm x 150mm em pontos ~ 226.77 x 425.20)
+                    const doc = new jsPDFLib({
+                        unit: 'mm',
+                        format: [80, 150],  // largura: 80mm (padrão cupom fiscal)
+                        orientation: 'portrait'
+                    });
+                    
+                    // Margens laterais
+                    const marginLeft = 5;  // 5mm de margem
                     const pageWidth = doc.internal.pageSize.getWidth();
                     let pageIndex = 0;
 
@@ -271,32 +290,30 @@
                             pageIndex++;
 
                             // Cabeçalho centralizado (marca)
-                            doc.setFontSize(14);
+                            doc.setFontSize(12);
                             const marca = 'RuaRoma Sunset';
                             const marcaW = doc.getTextWidth(marca);
-                            doc.text(marca, (pageWidth - marcaW) / 2, 30);
+                            doc.text(marca, (pageWidth - marcaW) / 2, 10);
 
                             // "VALE" em destaque centralizado
-                            doc.setFontSize(56);
+                            doc.setFontSize(32);  // reduzido para caber na largura
                             try { doc.setFont(undefined, 'bold'); } catch(e){}
                             const valeText = 'VALE';
                             const valeW = doc.getTextWidth(valeText);
-                            doc.text(valeText, (pageWidth - valeW) / 2, 88);
+                            doc.text(valeText, (pageWidth - valeW) / 2, 30);
 
-                            // Texto do vale - produto com tamanho reduzido e alinhado à esquerda
+                            // Texto do vale - produto alinhado à esquerda
                             const textoVale = `Vale 1x ${it.nomeItem}`;
-                            doc.setFontSize(28);                 // tamanho reduzido para destacar sem ocupar tanto espaço
+                            doc.setFontSize(16);
                             try { doc.setFont(undefined, 'bold'); } catch(e){}
-                            // posiciona à esquerda (mesma coluna do restante das informações)
-                            const leftX = 20;
-                            doc.text(textoVale, leftX, 132);
+                            doc.text(textoVale, marginLeft, 45);
 
-                            // Informação extra: índice da unidade, senha e data (alinhados à esquerda)
-                            doc.setFontSize(10);
+                            // Informações extras alinhadas à esquerda
+                            doc.setFontSize(8);
                             try { doc.setFont(undefined, 'normal'); } catch(e){}
-                            doc.text(`Unidade: ${u} de ${it.qtd}`, leftX, 152);
-                            doc.text(`Senha: ${senha}`, leftX, 162);
-                            doc.text(`Emitido: ${new Date().toLocaleString('pt-BR')}`, leftX, 172);
+                            doc.text(`Unidade: ${u} de ${it.qtd}`, marginLeft, 55);
+                            doc.text(`Senha: ${senha}`, marginLeft, 60);
+                            doc.text(`Emitido: ${new Date().toLocaleString('pt-BR')}`, marginLeft, 65);
                         }
                     });
 
