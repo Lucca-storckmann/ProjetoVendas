@@ -102,7 +102,7 @@
                 <!-- Pizzas -->
                 <div class="pedido-item item-pizza">
                     <input type="checkbox" id="mussarela" name="item_pedido" value="mussarela">
-                    <label for="mussarela">Mussarela - R$25,00</label>
+                    <label for="mussarela">Mussarela - R$20,00</label>
                     <input type="number" id="qtd_mussarela" class="qtd-input" value="0" min="0" max="99">
                 </div>
                 <div class="pedido-item item-pizza">
@@ -112,17 +112,17 @@
                 </div>
                 <div class="pedido-item item-pizza">
                     <input type="checkbox" id="pepperoni" name="item_pedido" value="pepperoni">
-                    <label for="pepperoni">Pepperoni - R$30,00</label>
+                    <label for="pepperoni">Pepperoni - R$20,00</label>
                     <input type="number" id="qtd_pepperoni" class="qtd-input" value="0" min="0" max="99">
                 </div>
                 <div class="pedido-item item-pizza">
                     <input type="checkbox" id="ragu_linguica" name="item_pedido" value="ragu_linguica">
-                    <label for="ragu_linguica">Ragú - R$35,00</label>
+                    <label for="ragu_linguica">Ragú - R$20,00</label>
                     <input type="number" id="qtd_ragu_linguica" class="qtd-input" value="0" min="0" max="99">
                 </div>
                 <div class="pedido-item item-pizza">
                     <input type="checkbox" id="pannacotta" name="item_pedido" value="pannacotta">
-                    <label for="pannacotta">Pannacotta - R$15,00</label>
+                    <label for="pannacotta">Pannacotta - R$20,00</label>
                     <input type="number" id="qtd_pannacotta" class="qtd-input" value="0" min="0" max="99">
                 </div>
 
@@ -134,17 +134,17 @@
                 </div>
                 <div class="pedido-item item-bebida">
                     <input type="checkbox" id="caipirinha" name="item_pedido" value="caipirinha">
-                    <label for="caipirinha">Caipirinha - R$20,00</label>
+                    <label for="caipirinha">Caipirinha - R$25,00</label>
                     <input type="number" id="qtd_caipirinha" class="qtd-input" value="0" min="0" max="99">
                 </div>
                 <div class="pedido-item item-bebida">
                     <input type="checkbox" id="mojito" name="item_pedido" value="mojito">
-                    <label for="mojito">Mojito - R$25,00</label>
+                    <label for="mojito">Mojito - R$28,00</label>
                     <input type="number" id="qtd_mojito" class="qtd-input" value="0" min="0" max="99">
                 </div>
                 <div class="pedido-item item-bebida">
                     <input type="checkbox" id="ginpesto" name="item_pedido" value="ginpesto">
-                    <label for="ginpesto">GinPesto - R$25,00</label>
+                    <label for="ginpesto">GinPesto - R$28,00</label>
                     <input type="number" id="qtd_ginpesto" class="qtd-input" value="0" min="0" max="99">
                 </div>
                 <div class="pedido-item item-bebida">
@@ -166,6 +166,16 @@
                     <input type="checkbox" id="chopp500" name="item_pedido" value="chopp500">
                     <label for="chopp500">Chopp 500ml - R$18,00</label>
                     <input type="number" id="qtd_chopp500" class="qtd-input" value="0" min="0" max="99">
+                </div>
+                <div class="pedido-item item-bebida">
+                    <input type="checkbox" id="chopp300promo" name="item_pedido" value="chopp300promo">
+                    <label for="chopp300promo">Chopp Prom 300ml - R$10,00</label>
+                    <input type="number" id="qtd_chopp300promo" class="qtd-input" value="0" min="0" max="99">
+                </div>
+                <div class="pedido-item item-bebida">
+                    <input type="checkbox" id="chopp500promo" name="item_pedido" value="chopp500promo">
+                    <label for="chopp500promo">Chopp Prom 500ml - R$16,00</label>
+                    <input type="number" id="qtd_chopp500promo" class="qtd-input" value="0" min="0" max="99">
                 </div>
 
                 <div class="inputBox" style="margin-top:10px;">
@@ -190,9 +200,9 @@
     document.addEventListener('DOMContentLoaded', () => {
         // preços
         window.precosItens = {
-            mussarela:25.00, calabresa:20.00, pepperoni:30.00, ragu_linguica:35.00, pannacotta:15.00,
-            cuba:20.00, caipirinha:20.00, mojito:25.00, ginpesto:25.00, refrigerante:8.00, agua:5.00,
-            chopp300:12.00, chopp500:18.00
+            mussarela:20.00, calabresa:20.00, pepperoni:20.00, ragu_linguica:20.00, pannacotta:20.00,
+            cuba:20.00, caipirinha:25.00, mojito:28.00, ginpesto:28.00, refrigerante:8.00, agua:5.00,
+            chopp300:12.00, chopp500:18.00, chopp300promo:10.00, chopp500promo:16.00
         };
 
         // mostrar categorias e filtrar itens
