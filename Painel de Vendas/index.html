@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Usando builds compat para expor o namespace global `firebase` -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
     <style>
         :root{
             --brand-red:#E63A2E;
@@ -77,6 +80,22 @@
             <img src="assets/logo.png" alt="RuaRoma Logo"
                  onerror="this.style.display='none'; document.getElementById('brand-text').style.display='inline-block'">
             <span id="brand-text">Vendas RuaRoma Sunset</span>
+        </div>
+
+        <div style="text-align:center; margin-bottom:12px;">
+            <button id="open-painel-btn" style="background:#333; color:#fff; border:none; padding:8px 14px; border-radius:8px; cursor:pointer; font-size:14px;" onclick="abrirPainelVendas()">📋 Ver Vendas</button>
+            <button style="background:#553388; color:#fff; border:none; padding:8px 14px; border-radius:8px; cursor:pointer; font-size:14px; margin-left:8px;" onclick="window.location.href='relatorio.html'">📊 Painel Relatórios</button>
+        </div>
+
+        <div id="painel-vendas" style="display:none; margin-bottom:12px; background: rgba(255,255,255,0.04); padding:10px; border-radius:8px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <strong>Painel de Vendas (últimas 200)</strong>
+                <div>
+                    <button style="background:#197a3b; color:#fff; border:none; padding:6px 8px; border-radius:6px; cursor:pointer; margin-right:6px;" onclick="carregarVendas()">Atualizar</button>
+                    <button style="background:#b33; color:#fff; border:none; padding:6px 8px; border-radius:6px; cursor:pointer;" onclick="fecharPainelVendas()">Fechar</button>
+                </div>
+            </div>
+            <div id="vendas-list" style="max-height:220px; overflow:auto; font-size:13px; color:#e6eef6;"></div>
         </div>
 
         <div id="tela-categorias">
@@ -197,6 +216,54 @@
     </div>
 
     <script>
+    // ========== CONFIGURAÇÃO DO FIREBASE ==========
+    // Valores fornecidos pelo usuário (copie/cole exatamente se desejar usar o snippet do Firebase)
+    const firebaseConfig = {
+        apiKey: "AIzaSyChQu85D9AYXZkzCSGGr0xsHw-ltWLmaVk",
+        authDomain: "painel-de-vendas-4eb5f.firebaseapp.com",
+        projectId: "painel-de-vendas-4eb5f",
+        storageBucket: "painel-de-vendas-4eb5f.firebasestorage.app",
+        messagingSenderId: "526943575513",
+        appId: "1:526943575513:web:807c47677f6f9d54074dc8",
+        measurementId: "G-E27B940ME8",
+        // URL do Realtime Database fornecida pelo usuário
+        databaseURL: "https://painel-de-vendas-4eb5f-default-rtdb.firebaseio.com/"
+    };
+
+    // Inicializa Firebase
+    try {
+        firebase.initializeApp(firebaseConfig);
+        window.firebaseDb = firebase.database();
+        console.log('✓ Firebase inicializado com sucesso');
+    } catch (e) {
+        console.warn('⚠ Firebase não configurado. Verifique as credenciais em firebaseConfig', e);
+        alert('⚠ Firebase não configurado: ' + (e && e.message ? e.message : e));
+        window.firebaseDb = null;
+    }
+
+    // Função para salvar venda no Firebase
+    async function salvarVendaNoFirebase(dados) {
+        if (!window.firebaseDb) {
+            console.warn('Firebase não disponível - verifique se a inicialização foi feita e se o site está sendo servido via http/https.');
+            alert('⚠ Firebase não disponível. Verifique `databaseURL` em firebaseConfig, se o site está servido via http/https e as regras do Realtime Database.');
+            return false;
+        }
+        try {
+            const timestamp = new Date().getTime();
+            const ref = window.firebaseDb.ref('vendas/' + timestamp);
+            await ref.set(dados);
+            console.log('✓ Venda salva no Firebase:', dados);
+            return true;
+        } catch (err) {
+            console.error('Erro ao salvar no Firebase:', err);
+            // Mostra detalhes do erro para facilitar debug
+            try { alert('✗ Erro ao salvar no Firebase: ' + (err && err.message ? err.message : JSON.stringify(err))); } catch(e) {}
+            return false;
+        }
+    }
+
+    // Teste removido em produção
+
     document.addEventListener('DOMContentLoaded', () => {
         // preços
         window.precosItens = {
@@ -256,7 +323,47 @@
         });
         atualizarValorTotal();
 
-        // submit -> gera 1 PDF único com 1 página por unidade, produto em destaque grande
+        // Funções para painel de vendas
+        window.abrirPainelVendas = function() {
+            document.getElementById('painel-vendas').style.display = 'block';
+            carregarVendas();
+        };
+        window.fecharPainelVendas = function() {
+            document.getElementById('painel-vendas').style.display = 'none';
+        };
+
+        async function carregarVendas() {
+            const listEl = document.getElementById('vendas-list');
+            listEl.innerHTML = 'Carregando...';
+            if (!window.firebaseDb) {
+                listEl.innerHTML = '<div style="color:#f88">Firebase não disponível.</div>';
+                return;
+            }
+            try {
+                const snapshot = await window.firebaseDb.ref('vendas').orderByKey().limitToLast(200).once('value');
+                const data = snapshot.val();
+                if (!data) {
+                    listEl.innerHTML = '<div>Nenhuma venda encontrada.</div>';
+                    return;
+                }
+                // Ordena por timestamp key (chaves são unix timestamps)
+                const entries = Object.entries(data).sort((a,b)=> Number(b[0]) - Number(a[0]));
+                const html = entries.map(([key, v]) => {
+                    const itens = Array.isArray(v.itens) ? v.itens.map(it=>`${it.nomeItem} (${it.qtd}x)`).join(', ') : (v.itens || '');
+                    return `<div style="padding:8px 6px; border-bottom:1px solid rgba(255,255,255,0.04);">
+                        <div style="font-weight:600;">${v.senha || ''} • R$ ${Number(v.valorTotal||0).toFixed(2)}</div>
+                        <div style="font-size:12px; color:#cfe">${itens}</div>
+                        <div style="font-size:11px; color:#9db">${v.timestamp || new Date(Number(key)).toLocaleString('pt-BR')}</div>
+                    </div>`;
+                }).join('');
+                listEl.innerHTML = html;
+            } catch (err) {
+                console.error('Erro ao carregar vendas:', err);
+                listEl.innerHTML = '<div style="color:#f88">Erro ao carregar vendas. Veja console.</div>';
+            }
+        }
+
+        // submit -> gera PDF e salva no Firebase
         const form = document.getElementById('formulario-pedido');
         if (form) {
             form.addEventListener('submit', function(e){
@@ -265,6 +372,7 @@
                 if (!jsPDFLib) { alert('Erro: jsPDF não carregado.'); return; }
 
                 const senha = document.getElementById('senha_pedido')?.value || Date.now().toString();
+                const total = document.getElementById('valorTotalCompra')?.value || '0.00';
 
                 const itensSelecionados = Array.from(document.querySelectorAll('input[name="item_pedido"]'))
                     .map(cb => {
@@ -272,7 +380,8 @@
                         const qtd = parseInt(document.getElementById('qtd_' + key)?.value || '0', 10) || 0;
                         const label = document.querySelector('label[for="'+cb.id+'"]');
                         const nomeItem = label ? label.textContent.split('-')[0].trim() : key;
-                        return { key, nomeItem, qtd };
+                        const preco = window.precosItens[key] || 0;
+                        return { key, nomeItem, qtd, preco };
                     })
                     .filter(it => it.qtd > 0);
 
@@ -280,6 +389,19 @@
                     alert('Nenhum item com quantidade selecionada.');
                     return;
                 }
+
+                // Prepara dados para salvar no Firebase
+                const dataVenda = {
+                    timestamp: new Date().toLocaleString('pt-BR'),
+                    senha: senha,
+                    valorTotal: parseFloat(total),
+                    itens: itensSelecionados,
+                    quantidadeItens: itensSelecionados.length,
+                    dataUnix: Date.now()
+                };
+
+                // Salva no Firebase (não aguarda resposta)
+                salvarVendaNoFirebase(dataVenda);
 
                 try {
                     // Configura PDF no formato cupom (80mm x 150mm em pontos ~ 226.77 x 425.20)
@@ -329,10 +451,10 @@
 
                     const filename = `vales-${senha}.pdf`;
                     doc.save(filename);
-                    alert(`PDF gerado com ${pageIndex} página(s): ${filename}`);
+                    alert(`✓ Venda registrada!\n✓ PDF gerado: ${filename}`);
                 } catch (err) {
                     console.error('Erro ao gerar PDF:', err);
-                    alert('Erro ao gerar PDF. Veja o console para detalhes.');
+                    alert('⚠ Erro ao gerar PDF, mas venda foi salva no Firebase.');
                 }
             });
         }

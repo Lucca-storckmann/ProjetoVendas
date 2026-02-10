@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <title>Painel de Relatórios | RuaRoma Sunset</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root{
+            --brand-red:#E63A2E;
+            --brand-green:#197a3b;
+            --bg-left:#071e26;
+            --bg-right:#0f3a45;
+            --card-bg: rgba(0,0,0,0.6);
+            --muted:#cfdde6;
+            --text:#ffffff;
+            --accent:#2ea3ff;
+        }
+        html,body{height:100%;margin:0;}
+        body{
+            display:flex;
+            flex-direction:column;
+            padding:20px;
+            background-image: linear-gradient(90deg,var(--bg-left),var(--bg-right));
+            font-family: "Inter", Arial, Helvetica, sans-serif;
+            -webkit-font-smoothing:antialiased;
+            color:var(--text);
+        }
+        .header{
+            text-align:center;
+            margin-bottom:20px;
+        }
+        .header h1{
+            margin:0;
+            color:var(--brand-red);
+            font-family:"Pacifico",cursive;
+        }
+        .container{
+            max-width:1200px;
+            margin:0 auto;
+            width:100%;
+        }
+        .upload-section{
+            background:var(--card-bg);
+            border-radius:15px;
+            padding:20px;
+            margin-bottom:20px;
+            border:2px dashed rgba(46,163,255,0.35);
+        }
+        .upload-label{
+            display:block;
+            margin-bottom:10px;
+            font-weight:600;
+            color:var(--muted);
+        }
+        input[type="file"]{
+            padding:10px;
+            border-radius:6px;
+            border:1px solid rgba(46,163,255,0.18);
+            background:rgba(0,0,0,0.15);
+            color:var(--text);
+            cursor:pointer;
+            display:block;
+            margin-bottom:12px;
+        }
+        .upload-buttons{
+            display:flex;
+            gap:8px;
+        }
+        button{
+            border:none;
+            padding:10px 16px;
+            border-radius:6px;
+            cursor:pointer;
+            font-weight:600;
+            color:white;
+            transition:all 0.3s;
+        }
+        button:hover{
+            opacity:0.9;
+            transform:translateY(-2px);
+        }
+        .btn-primary{
+            background:linear-gradient(90deg, var(--brand-red), #8f2b24);
+        }
+        .btn-success{
+            background:var(--brand-green);
+        }
+        .btn-warning{
+            background:#ff8c00;
+        }
+        .btn-danger{
+            background:#b33;
+        }
+        .btn-info{
+            background:#333;
+        }
+        .report-section{
+            background:var(--card-bg);
+            border-radius:15px;
+            padding:20px;
+            margin-bottom:20px;
+            display:none;
+        }
+        .report-section.active{
+            display:block;
+        }
+        .report-header{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:20px;
+            padding-bottom:12px;
+            border-bottom:1px solid rgba(46,163,255,0.35);
+        }
+        .report-header h2{
+            margin:0;
+            font-size:18px;
+        }
+        .report-stats{
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+            gap:12px;
+            margin-bottom:20px;
+        }
+        .stat-card{
+            background:rgba(0,0,0,0.3);
+            padding:12px;
+            border-radius:8px;
+            border-left:3px solid var(--brand-red);
+        }
+        .stat-label{
+            font-size:12px;
+            color:var(--muted);
+            margin-bottom:4px;
+        }
+        .stat-value{
+            font-size:18px;
+            font-weight:600;
+            color:var(--accent);
+        }
+        .table-wrapper{
+            overflow-x:auto;
+        }
+        table{
+            width:100%;
+            border-collapse:collapse;
+            font-size:13px;
+        }
+        th{
+            background:rgba(0,0,0,0.3);
+            padding:10px;
+            text-align:left;
+            border-bottom:2px solid rgba(46,163,255,0.35);
+            color:var(--accent);
+            font-weight:600;
+        }
+        td{
+            padding:10px;
+            border-bottom:1px solid rgba(46,163,255,0.18);
+            color:var(--text);
+        }
+        tr:hover{
+            background:rgba(46,163,255,0.08);
+        }
+        .error-message{
+            background:rgba(255,136,0,0.15);
+            border-left:3px solid #ff8c00;
+            padding:12px;
+            border-radius:6px;
+            margin-bottom:12px;
+            color:#ffb84d;
+            display:none;
+        }
+        .error-message.active{
+            display:block;
+        }
+        .success-message{
+            background:rgba(25,122,59,0.15);
+            border-left:3px solid var(--brand-green);
+            padding:12px;
+            border-radius:6px;
+            margin-bottom:12px;
+            color:#5dad5f;
+            display:none;
+        }
+        .success-message.active{
+            display:block;
+        }
+        .action-buttons{
+            display:flex;
+            gap:8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Painel de Relatórios</h1>
+        <p style="margin:0; color:var(--muted); font-size:14px;">RuaRoma Sunset</p>
+    </div>
+
+    <div class="container">
+        <!-- Seção Upload -->
+        <div class="upload-section">
+            <label class="upload-label">📤 Carregar Arquivo JSON</label>
+            <div class="error-message" id="error-msg"></div>
+            <div class="success-message" id="success-msg"></div>
+            
+            <input type="file" id="json-file" accept=".json" />
+            
+            <div class="upload-buttons">
+                <button class="btn-primary" onclick="carregarJSON()">Carregar JSON</button>
+                <label style="color:var(--muted); font-size:13px; margin-left:12px;">
+                    Campo de Valor:
+                    <select id="valor-campo" style="background:rgba(0,0,0,0.15); color:white; border:1px solid rgba(46,163,255,0.18); padding:4px 6px; border-radius:4px; font-size:12px;">
+                        <option value="">Auto-detectar</option>
+                    </select>
+                </label>
+                <button class="btn-success" onclick="gerarRelatorio()">Gerar Relatório</button>
+                <button class="btn-warning" onclick="exportarCSV()">Exportar CSV</button>
+                <button class="btn-info" onclick="voltarPainel()">← Voltar ao Painel</button>
+            </div>
+        </div>
+
+        <!-- Seção Relatório -->
+        <div class="report-section" id="report-section">
+            <div class="report-header">
+                <div>
+                    <h2>Relatório de Dados</h2>
+                    <p id="filename" style="margin:4px 0 0 0; font-size:12px; color:var(--muted);">-</p>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn-warning" onclick="imprimirRelatorio()">🖨️ Imprimir</button>
+                    <button class="btn-info" onclick="limparRelatorio()">Limpar</button>
+                </div>
+            </div>
+
+            <!-- Estatísticas -->
+            <div class="report-stats">
+                <div class="stat-card">
+                    <div class="stat-label">Total de Registros</div>
+                    <div class="stat-value" id="stat-records">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Soma de Valores</div>
+                    <div class="stat-value" id="stat-total">R$ 0.00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Média de Valores</div>
+                    <div class="stat-value" id="stat-average">R$ 0.00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Maior Valor</div>
+                    <div class="stat-value" id="stat-max">R$ 0.00</div>
+                </div>
+            </div>
+
+            <!-- Tabela -->
+            <div class="table-wrapper">
+                <table id="data-table">
+                    <thead id="table-head"></thead>
+                    <tbody id="table-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    let dataCarregada = null;
+    let nomeArquivo = '';
+    let colunasDisponiveis = [];
+
+    // Carregar arquivo JSON do input
+    window.carregarJSON = function() {
+        const fileInput = document.getElementById('json-file');
+        const errorMsg = document.getElementById('error-msg');
+        const successMsg = document.getElementById('success-msg');
+
+        if (!fileInput.files || fileInput.files.length === 0) {
+            mostrarErro('Selecione um arquivo JSON.');
+            return;
+        }
+
+        const file = fileInput.files[0];
+        nomeArquivo = file.name;
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            try {
+                dataCarregada = JSON.parse(e.target.result);
+                
+                // Processar estrutura (pode ser array ou objeto Firebase aninhado)
+                let dados = normalizarDados(dataCarregada);
+                
+                // Detectar todas as colunas disponíveis
+                colunasDisponiveis = [];
+                const colSet = new Set();
+                dados.forEach(item => {
+                    if (typeof item === 'object' && item !== null) {
+                        Object.keys(item).forEach(k => colSet.add(k));
+                    }
+                });
+                colunasDisponiveis = Array.from(colSet).sort();
+
+                // Popular select de colunas
+                const valorCampo = document.getElementById('valor-campo');
+                const opcoesHTML = '<option value="">Auto-detectar</option>' + 
+                    colunasDisponiveis.map(col => `<option value="${col}">${col}</option>`).join('');
+                valorCampo.innerHTML = opcoesHTML;
+
+                mostrarSucesso(`✓ ${nomeArquivo} carregado com sucesso. ${dados.length} registros encontrados.`);
+                console.log('Colunas detectadas:', colunasDisponiveis);
+                console.log('Dados normalizados:', dados);
+                gerarRelatorio();
+            } catch (err) {
+                mostrarErro('Erro ao processar JSON: ' + err.message);
+                dataCarregada = null;
+            }
+        };
+
+        reader.onerror = function() {
+            mostrarErro('Erro ao ler o arquivo.');
+        };
+
+        reader.readAsText(file);
+    };
+
+    // Normalizar dados - converter estrutura Firebase em array
+    function normalizarDados(data) {
+        if (Array.isArray(data)) {
+            console.log('Dados já é array, usando diretamente');
+            return data;
+        }
+
+        if (typeof data === 'object' && data !== null) {
+            let valores = Object.values(data);
+            console.log('Convertido para array:', valores.length, 'valores de nível 1');
+
+            // Verificar se é estrutura aninhada (Firebase com timestamps como chaves)
+            if (valores.length === 1 && typeof valores[0] === 'object' && valores[0] !== null) {
+                const primeiro = valores[0];
+                const chaves = Object.keys(primeiro);
+                
+                // Se as chaves parecem timestamps (números grandes), desempacotar
+                if (chaves.every(k => /^\d{13}$/.test(k))) {
+                    console.log('Detectada estrutura Firebase aninhada, desempacotando...');
+                    console.log('Timestamps encontrados:', chaves);
+                    valores = Object.values(primeiro);
+                    console.log('Após desempacotar:', valores.length, 'registros');
+                }
+            }
+
+            return valores;
+        }
+
+        return [];
+    }
+
+    // Gerar relatório visual
+    window.gerarRelatorio = function() {
+        if (!dataCarregada) {
+            mostrarErro('Carregue um arquivo JSON primeiro.');
+            return;
+        }
+
+        document.getElementById('report-section').classList.add('active');
+        document.getElementById('filename').textContent = nomeArquivo;
+
+        // Processar dados usando normalização
+        const dados = normalizarDados(dataCarregada);
+        const campoValorSelecionado = document.getElementById('valor-campo').value;
+        
+        console.log('=== GERANDO RELATÓRIO ===');
+        console.log('Tipo de dados após normalizaçao: Array');
+        console.log('Quantidade de registros:', dados.length);
+        console.log('Campo selecionado:', campoValorSelecionado || 'auto-detectar');
+        console.log('Primeiros 3 registros:', dados.slice(0, 3));
+
+        // Calcular estatísticas
+        let somaValores = 0;
+        let maxValor = 0;
+        let contadorValores = 0;
+
+        dados.forEach((item, idx) => {
+            const valor = extrairValor(item, campoValorSelecionado);
+            console.log(`[${idx}] Valor extraído:`, valor, '| Item:', item);
+            if (valor > 0) {
+                somaValores += valor;
+                contadorValores++;
+                if (valor > maxValor) maxValor = valor;
+            }
+        });
+
+        const media = contadorValores > 0 ? somaValores / contadorValores : 0;
+
+        console.log('=== RESULTADO FINAL ===');
+        console.log('Soma:', somaValores);
+        console.log('Média:', media);
+        console.log('Máximo:', maxValor);
+        console.log('Registros com valor:', contadorValores);
+        console.log('Total de registros:', dados.length);
+
+        document.getElementById('stat-records').textContent = dados.length;
+        document.getElementById('stat-total').textContent = 'R$ ' + somaValores.toFixed(2);
+        document.getElementById('stat-average').textContent = 'R$ ' + media.toFixed(2);
+        document.getElementById('stat-max').textContent = 'R$ ' + maxValor.toFixed(2);
+
+        // Gerar tabela
+        if (dados.length === 0) {
+            document.getElementById('table-head').innerHTML = '';
+            document.getElementById('table-body').innerHTML = '<tr><td colspan="100%">Nenhum dado para exibir.</td></tr>';
+            return;
+        }
+
+        // Detectar colunas
+        const colunas = new Set();
+        dados.forEach(item => {
+            if (typeof item === 'object' && item !== null) {
+                Object.keys(item).forEach(k => colunas.add(k));
+            }
+        });
+        const colunasArray = Array.from(colunas);
+
+        // Cabeçalho
+        const thead = document.getElementById('table-head');
+        thead.innerHTML = '<tr>' + colunasArray.map(c => `<th>${c}</th>`).join('') + '</tr>';
+
+        // Corpo
+        const tbody = document.getElementById('table-body');
+        tbody.innerHTML = dados.map(item => {
+            return '<tr>' + colunasArray.map(col => {
+                const valor = item[col];
+                if (typeof valor === 'object') {
+                    return `<td>${JSON.stringify(valor)}</td>`;
+                }
+                return `<td>${valor || '-'}</td>`;
+            }).join('') + '</tr>';
+        }).join('');
+    };
+
+    // Extrair valor numérico (agora com suporte ao campo selecionado)
+    function extrairValor(item, campoSelecionado) {
+        if (typeof item !== 'object' || item === null) {
+            console.warn('Item não é objeto:', item);
+            return 0;
+        }
+
+        // Se campo foi explicitamente selecionado, usar apenas ele
+        if (campoSelecionado) {
+            const valor = Number(item[campoSelecionado]);
+            console.log(`Valor extraído de "${campoSelecionado}":`, item[campoSelecionado], '→', valor);
+            return isNaN(valor) ? 0 : valor;
+        }
+
+        // Caso contrário, tentar campos comuns
+        const campos = ['valorTotal', 'valor', 'value', 'total', 'amount', 'preco', 'price', 'sum'];
+        for (let campo of campos) {
+            if (item[campo] !== undefined && item[campo] !== null) {
+                const valor = Number(item[campo]);
+                if (!isNaN(valor) && valor !== 0) {
+                    console.log(`Campo "${campo}" encontrado:`, item[campo], '→', valor);
+                    return valor;
+                }
+            }
+        }
+
+        // Tentar encontrar primeiro campo que seja numérico
+        for (let chave in item) {
+            if (typeof item[chave] === 'number' || (typeof item[chave] === 'string' && !isNaN(item[chave]))) {
+                const valor = Number(item[chave]);
+                if (valor > 0) {
+                    console.log(`Campo numérico detectado "${chave}":`, item[chave], '→', valor);
+                    return valor;
+                }
+            }
+        }
+
+        console.warn('Nenhum valor numérico encontrado em:', item);
+        return 0;
+    }
+
+    // Mostrar mensagem de erro
+    function mostrarErro(msg) {
+        const errorMsg = document.getElementById('error-msg');
+        errorMsg.textContent = msg;
+        errorMsg.classList.add('active');
+        setTimeout(() => errorMsg.classList.remove('active'), 5000);
+    }
+
+    // Mostrar mensagem de sucesso
+    function mostrarSucesso(msg) {
+        const successMsg = document.getElementById('success-msg');
+        successMsg.textContent = msg;
+        successMsg.classList.add('active');
+        setTimeout(() => successMsg.classList.remove('active'), 5000);
+    }
+
+    // Imprimir relatório
+    window.imprimirRelatorio = function() {
+        if (!dataCarregada) {
+            mostrarErro('Nenhum dado para imprimir.');
+            return;
+        }
+        window.print();
+    };
+
+    // Exportar para CSV
+    window.exportarCSV = function() {
+        if (!dataCarregada) {
+            mostrarErro('Carregue um arquivo JSON primeiro.');
+            return;
+        }
+
+        const dados = normalizarDados(dataCarregada);
+        if (dados.length === 0) {
+            mostrarErro('Nenhum dado para exportar.');
+            return;
+        }
+
+        // Detectar colunas
+        const colunas = new Set();
+        dados.forEach(item => {
+            if (typeof item === 'object' && item !== null) {
+                Object.keys(item).forEach(k => colunas.add(k));
+            }
+        });
+        const colunasArray = Array.from(colunas);
+
+        // Criar CSV
+        let csv = colunasArray.join(',') + '\n';
+        dados.forEach(item => {
+            const row = colunasArray.map(col => {
+                const valor = item[col];
+                if (typeof valor === 'object') {
+                    return JSON.stringify(valor).replace(/"/g, '""');
+                }
+                return String(valor || '').replace(/"/g, '""');
+            }).join(',');
+            csv += row + '\n';
+        });
+
+        // Download
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = nomeArquivo.replace('.json', '') + '_relatorio.csv';
+        link.click();
+        mostrarSucesso('✓ CSV exportado com sucesso.');
+    };
+
+    // Limpar relatório
+    window.limparRelatorio = function() {
+        if (confirm('Deseja limpar o relatório?')) {
+            dataCarregada = null;
+            nomeArquivo = '';
+            document.getElementById('report-section').classList.remove('active');
+            document.getElementById('json-file').value = '';
+            document.getElementById('error-msg').classList.remove('active');
+            document.getElementById('success-msg').classList.remove('active');
+            mostrarSucesso('✓ Relatório limpo.');
+        }
+    };
+
+    // Voltar ao painel (index.html)
+    window.voltarPainel = function() {
+        window.location.href = 'index.html';
+    };
+    </script>
+</body>
+</html>
