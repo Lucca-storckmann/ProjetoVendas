@@ -230,6 +230,7 @@
                     <p id="filename" style="margin:4px 0 0 0; font-size:12px; color:var(--muted);">-</p>
                 </div>
                 <div class="action-buttons">
+                    <button class="btn-warning" onclick="compilarProdutos()">📦 Compilar Produtos</button>
                     <button class="btn-warning" onclick="imprimirRelatorio()">🖨️ Imprimir</button>
                     <button class="btn-info" onclick="limparRelatorio()">Limpar</button>
                 </div>
@@ -261,6 +262,24 @@
                     <thead id="table-head"></thead>
                     <tbody id="table-body"></tbody>
                 </table>
+            </div>
+
+            <!-- Compilação de Produtos -->
+            <div id="compilacao-section" style="display:none; margin-top:30px; border-top:2px solid rgba(46,163,255,0.35); padding-top:20px;">
+                <h2 style="margin-top:0; color:var(--accent);">📦 Produtos Compilados por Quantidade</h2>
+                <div class="table-wrapper">
+                    <table id="produtos-compilados">
+                        <thead>
+                            <tr>
+                                <th>Produto</th>
+                                <th>Quantidade</th>
+                                <th>Preço Unitário</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="compilacao-body"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -495,6 +514,81 @@
         setTimeout(() => successMsg.classList.remove('active'), 5000);
     }
 
+    // Compilar produtos por quantidade
+    window.compilarProdutos = function() {
+        if (!dataCarregada) {
+            mostrarErro('Carregue um arquivo JSON primeiro.');
+            return;
+        }
+
+        const dados = normalizarDados(dataCarregada);
+        const produtosAgrupados = {};
+
+        // Agrupar produtos
+        dados.forEach(venda => {
+            const itens = venda.itens || [];
+
+            if (Array.isArray(itens)) {
+                // Formato array
+                itens.forEach(item => {
+                    const nomeProduto = item.nomeItem || item.nome || 'Produto Desconhecido';
+                    const quantidade = parseInt(item.qtd || item.quantidade || 1);
+                    const preco = parseFloat(item.preco || item.price || 0);
+
+                    if (!produtosAgrupados[nomeProduto]) {
+                        produtosAgrupados[nomeProduto] = {
+                            quantidade: 0,
+                            precoUnitario: preco,
+                            subtotal: 0
+                        };
+                    }
+
+                    produtosAgrupados[nomeProduto].quantidade += quantidade;
+                    produtosAgrupados[nomeProduto].subtotal += preco * quantidade;
+                });
+            } else if (typeof itens === 'string') {
+                // Formato texto "Produto (Qx)"
+                const regex = /([A-Za-záéíóúâêôãõç\s]+)\s*\((\d+)x\)/gi;
+                let match;
+                while ((match = regex.exec(itens)) !== null) {
+                    const nomeProduto = match[1].trim();
+                    const quantidade = parseInt(match[2]);
+
+                    if (!produtosAgrupados[nomeProduto]) {
+                        produtosAgrupados[nomeProduto] = {
+                            quantidade: 0,
+                            precoUnitario: 0,
+                            subtotal: 0
+                        };
+                    }
+
+                    produtosAgrupados[nomeProduto].quantidade += quantidade;
+                }
+            }
+        });
+
+        // Ordenar por quantidade (decrescente)
+        const produtosOrdenados = Object.entries(produtosAgrupados)
+            .sort((a, b) => b[1].quantidade - a[1].quantidade);
+
+        // Gerar tabela
+        const compilacaoBody = document.getElementById('compilacao-body');
+        compilacaoBody.innerHTML = produtosOrdenados.map(([nome, dados]) => `
+            <tr>
+                <td>${nome}</td>
+                <td style="text-align:center; font-weight:600; color:var(--accent);">${dados.quantidade}</td>
+                <td style="text-align:right;">R$ ${dados.precoUnitario.toFixed(2)}</td>
+                <td style="text-align:right; font-weight:600; color:var(--brand-green);">R$ ${dados.subtotal.toFixed(2)}</td>
+            </tr>
+        `).join('');
+
+        // Mostrar seção
+        document.getElementById('compilacao-section').style.display = 'block';
+        mostrarSucesso(`✓ Compilação gerada: ${produtosOrdenados.length} produtos encontrados.`);
+        
+        console.log('Produtos compilados:', produtosOrdenados);
+    };
+
     // Imprimir relatório
     window.imprimirRelatorio = function() {
         if (!dataCarregada) {
@@ -554,6 +648,7 @@
             dataCarregada = null;
             nomeArquivo = '';
             document.getElementById('report-section').classList.remove('active');
+            document.getElementById('compilacao-section').style.display = 'none';
             document.getElementById('json-file').value = '';
             document.getElementById('error-msg').classList.remove('active');
             document.getElementById('success-msg').classList.remove('active');
